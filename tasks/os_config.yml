@@ -1,0 +1,49 @@
+---
+# tasks file for os_placement
+- name: "Create placement user"
+  openstack.cloud.identity_user:
+    auth: "{{ os_placement_cloud_auth }}"
+    name: placement
+    password: "{{ os_placement_ka_password }}"
+    domain: default
+    state: present
+  no_log: true
+  delegate_to: localhost
+
+
+- name: "Add placement user to project service with admin role"
+  openstack.cloud.role_assignment:
+    auth: "{{ os_placement_cloud_auth }}"
+    user: placement
+    role: admin
+    project: service
+    state: present
+  delegate_to: localhost
+
+- name: "Create placement service"
+  openstack.cloud.catalog_service:
+    auth: "{{ os_placement_cloud_auth }}"
+    state: present
+    name: placement
+    type: placement
+    description: Placement API
+  delegate_to: localhost
+
+- name: "Create endpoint service for placement"
+  openstack.cloud.endpoint:
+    auth: "{{ os_placement_cloud_auth }}"
+    service: placement
+    endpoint_interface: "{{ item.interface }}"
+    url: "{{ item.url }}"
+    region: "{{ item.region }}"
+    state: present
+  loop:
+    - region: Nation1
+      interface: public
+      url: http://10.0.0.50:8778
+    - region: Nation1
+      interface: internal
+      url: http://10.0.0.50:8778
+    - region: Nation1
+      interface: admin
+      url: http://10.0.0.50:8778

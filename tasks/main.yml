@@ -1,2 +1,48 @@
 ---
-# tasks file for os_placement
+- name: "Include OpenStack config task"
+  include_tasks: "os_config.yml"
+  run_once: true
+
+- name: "Install placement package"
+  apt:
+    name: "placement-api"
+    state: present
+  become: true
+
+- name: "Push config"
+  ansible.builtin.template:
+    src: "etc/placement/placement.conf.j2"
+    dest: "/etc/placement/placement.conf"
+    owner: "placement"
+    group: "placement"
+    mode: "0640"
+  become: true
+
+- name: "Check if placement was already bootstrapped from database"
+  # check if tables exist in database with ansible module
+  mysql_query:
+    login_db: "{{ os_placement_db_name }}"
+    login_host: "{{ os_placement_db_host }}"
+    login_user: "{{ os_placement_db_user }}"
+    login_password: "{{ os_placement_db_pass }}"
+    query: show tables
+  register: "placement_db_info"
+
+- name: "debug"
+  ansible.builtin.debug:
+    msg: "{{ placement_db_info }}"
+
+- name: Run placement database sync
+  command: su -s /bin/sh -c "placement-manage db_sync" placement
+  register: placement_db_sync_check
+  failed_when: "placement_db_sync_check.rc == 1"
+  changed_when: "placement_db_sync_check.rc not in [2, 3, 4]"
+  when: placement_db_info.query_result.0 | length  == 0
+  become: true
+
+- name: "Restart placement"
+  service:
+    name: "apache2"
+    state: "restarted"
+    enabled: true
+  become: true

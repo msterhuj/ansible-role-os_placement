@@ -1,2 +1,22 @@
 ---
 # defaults file for os_placement
+os_placement_db_host: "localhost"
+os_placement_db_name: "placement"
+os_placement_db_user: "placement"
+os_placement_db_pass: "placement"
+
+os_placement_db_connection: "mysql+pymysql://{{ os_placement_db_user }}:{{ os_placement_db_pass }}@{{ os_placement_db_host }}/{{ os_placement_db_name }}"
+
+
+
+# ka is an abbreviation for keystone_authtoken
+os_placement_ka_auth_url: "http://{{ ansible_fqdn }}:5000/v3"
+os_placement_ka_memcached_servers: "{{ ansible_fqdn }}:11211"
+os_placement_ka_auth_type: "password"
+os_placement_ka_project_domain_name: "Default"
+os_placement_ka_user_domain_name: "Default"
+os_placement_ka_project_name: "service"
+os_placement_ka_username: "placement"
+os_placement_ka_password: "PLACEMENT_PASS"
+
+os_placement_api_auth_strategy: "keystone"
