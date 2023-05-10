@@ -7,8 +7,9 @@
     password: "{{ os_placement_ka_password }}"
     domain: default
     state: present
-  no_log: true
+  no_log: false
   delegate_to: localhost
+  become: false
 
 
 - name: "Add placement user to project service with admin role"
@@ -19,6 +20,7 @@
     project: service
     state: present
   delegate_to: localhost
+  become: false
 
 - name: "Create placement service"
   openstack.cloud.catalog_service:
@@ -28,6 +30,7 @@
     type: placement
     description: Placement API
   delegate_to: localhost
+  become: false
 
 - name: "Create endpoint service for placement"
   openstack.cloud.endpoint:
@@ -37,6 +40,7 @@
     url: "{{ item.url }}"
     region: "{{ item.region }}"
     state: present
+  become: false
   loop:
     - region: Nation1
       interface: public
