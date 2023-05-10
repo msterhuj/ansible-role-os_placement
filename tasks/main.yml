@@ -30,10 +30,10 @@
 
 - name: "debug"
   ansible.builtin.debug:
-    msg: "{{ placement_db_info }}"
+    msg: "{{ placement_db_info.query_result.0 | length  == 0 }}"
 
 - name: Run placement database sync
-  command: su -s /bin/sh -c "placement-manage db_sync" placement
+  command: su -s /bin/sh -c "placement-manage db sync" placement
   register: placement_db_sync_check
   failed_when: "placement_db_sync_check.rc == 1"
   changed_when: "placement_db_sync_check.rc not in [2, 3, 4]"
